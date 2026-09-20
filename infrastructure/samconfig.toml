@@ -1,0 +1,26 @@
+# FinGraph Sentinel AWS SAM Configuration
+version = 0.1
+
+[default]
+[default.global.parameters]
+stack_name = "fingraph-sentinel"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.validate.parameters]
+lint = true
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+resolve_s3 = true
+stack_name = "fingraph-sentinel"
+s3_prefix = "fingraph-sentinel"
+region = "us-east-1"
+image_repositories = []
+parameter_overrides = [
+  "BedrockModelId=anthropic.claude-3-5-sonnet-20241022-v2:0",
+  "Environment=production"
+]
