@@ -51,3 +51,7 @@ aws_credentials
 # OS files
 .DS_Store
 Thumbs.db
+
+# Temporary uploads & scratch files
+data/uploaded_*
+fix_rupee.py

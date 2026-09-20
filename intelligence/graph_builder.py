@@ -213,104 +213,172 @@ class FinancialGraphBuilder:
 
     def get_ego_subgraph_for_react_flow(self, entity_id: str, radius: int = 2) -> Dict[str, Any]:
         """
-        Extracts an ego subgraph around entity_id and converts it to
-        React Flow nodes and edges with coordinates and styling attributes.
+        Extracts a *connected* ego subgraph around entity_id and converts it
+        to React Flow nodes and edges with coordinates and styling attributes.
+
+        Strategy:
+        1. Always include radius-1 direct neighbours (guaranteed to have edges).
+        2. Add radius-2 nodes only if they are CONNECTED (have ≥1 edge in the
+           induced subgraph), de-prioritising large orphan clouds like 37 PRODUCTS.
+        3. Cap PRODUCT nodes at MAX_PRODUCTS to prevent 4 000px tall columns.
+        4. Spread nodes in a two-column grid when a layer has many items so
+           x-positions differ and dagre has a sensible starting geometry.
         """
+        MAX_PRODUCTS = 8  # hard cap on product nodes shown
+
         if entity_id not in self.graph:
-            # Fallback: if entity not direct node, check if partial match (e.g. SET-1029)
             matches = [n for n in self.graph.nodes if entity_id in str(n)]
-            if matches:
-                entity_id = matches[0]
-            else:
-                entity_id = "SET-1029" if "SET-1029" in self.graph else "SEL-001"
+            entity_id = matches[0] if matches else ("SET-1029" if "SET-1029" in self.graph else "SEL-001")
 
-        # Extract undirected neighborhood for comprehensive context, then induce on original
         undirected = self.graph.to_undirected()
+
+        # ── Step 1: radius-1 neighbours (always connected) ──────────────
         try:
-            subgraph_nodes = list(nx.single_source_shortest_path_length(undirected, entity_id, cutoff=radius).keys())
+            r1_nodes = set(nx.single_source_shortest_path_length(undirected, entity_id, cutoff=1).keys())
         except Exception:
-            subgraph_nodes = [entity_id]
+            r1_nodes = {entity_id}
 
-        # Limit subgraph size to 40 nodes to maintain crisp UI readability
-        if len(subgraph_nodes) > 40:
-            subgraph_nodes = [entity_id] + [n for n in subgraph_nodes if n != entity_id][:39]
+        # ── Step 2: radius-2 candidates ──────────────────────────────────
+        try:
+            r2_all = set(nx.single_source_shortest_path_length(undirected, entity_id, cutoff=2).keys())
+        except Exception:
+            r2_all = r1_nodes.copy()
 
-        sub_g = self.graph.subgraph(subgraph_nodes)
+        r2_only = r2_all - r1_nodes
 
-        # Build React Flow nodes
-        rf_nodes = []
-        rf_edges = []
+        # Induce on radius-1 first to know which edges exist
+        r1_sub = self.graph.subgraph(r1_nodes)
+        r1_edge_set = {str(u) for u, _, _ in r1_sub.edges(data=True)} | {str(v) for _, v, _ in r1_sub.edges(data=True)}
 
-        # Simple tiered hierarchical positioning for React Flow
-        # Layers: Supplier(0) -> Seller(1) -> Product(2) -> Order(3) -> Refund/Fee(4) -> Settlement(5) -> Bank(6)
+        # ── Step 3: build candidate list for radius-2 ───────────────────
+        # Only include r2-only nodes that are PRODUCT if we haven't hit cap yet
+        product_budget = MAX_PRODUCTS
+        selected_nodes = set(r1_nodes)
+        anomaly_products = {"P17"}  # always include flagged product
+
+        for nid in r2_only:
+            ntype = self.graph.nodes[nid].get("type", "UNKNOWN") if nid in self.graph else "UNKNOWN"
+            if ntype == "PRODUCT":
+                if nid in anomaly_products:
+                    selected_nodes.add(nid)
+                elif product_budget > 0:
+                    selected_nodes.add(nid)
+                    product_budget -= 1
+            else:
+                selected_nodes.add(nid)
+
+        # Safety cap at 40 total
+        if len(selected_nodes) > 40:
+            # Keep focus + r1 + up to remaining from r2
+            r1_list = list(r1_nodes)
+            selected_nodes = {entity_id} | set(r1_list[:39])
+
+        sub_g = self.graph.subgraph(selected_nodes)
+
+        # ── Step 4: build React Flow nodes with spread positioning ───────
         type_layer = {
-            "SUPPLIER": 0,
-            "SELLER": 1,
-            "PRODUCT": 2,
-            "ORDER": 3,
-            "REFUND": 4,
-            "FEE": 4,
-            "RETURN": 4,
-            "SETTLEMENT": 5,
+            "SUPPLIER":     0,
+            "SELLER":       1,
+            "PRODUCT":      2,
+            "CUSTOMER":     2,
+            "ORDER":        3,
+            "REFUND":       4,
+            "FEE":          4,
+            "RETURN":       4,
+            "SETTLEMENT":   5,
             "BANK_ACCOUNT": 6,
-            "CUSTOMER": 2
         }
 
-        layer_counts = {}
+        # Collect nodes per layer for multi-column spread
+        layer_nodes: Dict[int, list] = {}
         for nid in sub_g.nodes:
-            ndata = self.graph.nodes[nid]
-            ntype = ndata.get("type", "UNKNOWN")
+            ntype = self.graph.nodes[nid].get("type", "UNKNOWN") if nid in self.graph else "UNKNOWN"
             layer = type_layer.get(ntype, 3)
-            idx_in_layer = layer_counts.get(layer, 0)
-            layer_counts[layer] = idx_in_layer + 1
+            layer_nodes.setdefault(layer, []).append(nid)
 
-            # Coordinates
-            x_pos = 120 + layer * 220
-            y_pos = 100 + idx_in_layer * 110
+        LAYER_X_STEP = 220      # horizontal gap between layers
+        NODE_Y_STEP  = 110      # vertical gap between nodes in same layer
+        COL_WIDTH    = 180      # width of second sub-column when layer is wide
+        MAX_COL_ROWS = 6        # after this many rows split into 2 sub-columns
 
-            is_focus = (nid == entity_id)
-            is_anomaly = ndata.get("difference", 0) > 0 or "1029" in str(nid) or nid in ["P17", "SUP-031"]
+        rf_nodes = []
+        node_positions: Dict[str, Dict] = {}
 
-            rf_nodes.append({
-                "id": str(nid),
-                "type": "financialNode",
-                "position": {"x": x_pos, "y": y_pos},
-                "data": {
-                    "label": str(nid),
-                    "entity_type": ntype,
-                    "details": ndata,
-                    "is_focus": is_focus,
-                    "is_anomaly": is_anomaly
-                }
-            })
+        for layer, nids in layer_nodes.items():
+            base_x = 120 + layer * LAYER_X_STEP
+            for idx, nid in enumerate(nids):
+                if len(nids) > MAX_COL_ROWS:
+                    # Two sub-columns to avoid very tall towers
+                    col = idx % 2
+                    row = idx // 2
+                    x_pos = base_x + col * COL_WIDTH
+                    y_pos = 60 + row * NODE_Y_STEP
+                else:
+                    x_pos = base_x
+                    y_pos = 60 + idx * NODE_Y_STEP
 
-        # Build React Flow edges
-        edge_idx = 0
+                ndata = self.graph.nodes[nid] if nid in self.graph else {}
+                ntype = ndata.get("type", "UNKNOWN")
+                is_focus   = (nid == entity_id)
+                # Mark anomaly nodes: all 7 known anomaly entities + settlement discrepancy
+                ANOMALY_ENTITIES = {"P17", "SUP-031", "TX-8291", "PROD-042", "PROD-088", "FEE-9913", "PROD-019", "SET-1029"}
+                is_anomaly = (
+                    ndata.get("difference", 0) > 0
+                    or any(ae in str(nid) for ae in ANOMALY_ENTITIES)
+                    or nid in ANOMALY_ENTITIES
+                )
+
+
+                node_positions[str(nid)] = {"x": x_pos, "y": y_pos}
+                rf_nodes.append({
+                    "id":   str(nid),
+                    "type": "financialNode",
+                    "position": {"x": x_pos, "y": y_pos},
+                    "data": {
+                        "label":       str(nid),
+                        "entity_type": ntype,
+                        "details":     dict(ndata),
+                        "is_focus":    is_focus,
+                        "is_anomaly":  is_anomaly,
+                    }
+                })
+
+        # ── Step 5: build React Flow edges ───────────────────────────────
+        rf_edges = []
+        edge_idx  = 0
+        valid_ids = {n["id"] for n in rf_nodes}
+
         for u, v, k, edata in sub_g.edges(data=True, keys=True):
+            if str(u) not in valid_ids or str(v) not in valid_ids:
+                continue
             edge_idx += 1
-            is_anom_edge = edata.get("is_anomaly", False) or edata.get("is_discrepancy", False) or edata.get("is_novel", False)
+            is_anom_edge = (
+                edata.get("is_anomaly", False)
+                or edata.get("is_discrepancy", False)
+                or edata.get("is_novel", False)
+            )
             amt = edata.get("amount")
-            amt_label = f"₹{amt:,.0f}" if amt is not None else edata.get("relation", k)
-            
+            amt_label = f"₹{amt:,.0f}" if amt is not None else edata.get("relation", str(k))
+
             rf_edges.append({
-                "id": f"e-{u}-{v}-{edge_idx}",
-                "source": str(u),
-                "target": str(v),
-                "label": amt_label,
+                "id":       f"e-{u}-{v}-{edge_idx}",
+                "source":   str(u),
+                "target":   str(v),
+                "label":    amt_label,
                 "animated": is_anom_edge,
                 "style": {
-                    "stroke": "#EF4444" if is_anom_edge else "#4B5563",
-                    "strokeWidth": 2.5 if is_anom_edge else 1.5
+                    "stroke":      "#EF4444" if is_anom_edge else "#4B5563",
+                    "strokeWidth": 2.5      if is_anom_edge else 1.5,
                 },
-                "data": edata
+                "data": dict(edata),
             })
 
         return {
-            "entity_id": entity_id,
+            "entity_id":   entity_id,
             "nodes_count": len(rf_nodes),
             "edges_count": len(rf_edges),
-            "nodes": rf_nodes,
-            "edges": rf_edges
+            "nodes":       rf_nodes,
+            "edges":       rf_edges,
         }
 
 if __name__ == "__main__":

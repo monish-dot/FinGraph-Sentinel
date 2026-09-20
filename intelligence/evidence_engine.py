@@ -1,4 +1,4 @@
-"""
+﻿"""
 FinGraph Sentinel - Deterministic Evidence Engine
 Assembles immutable, structured evidence objects for flagged anomalies.
 The AI agent retrieves these verified objects through tools.
@@ -78,7 +78,7 @@ class EvidenceEngine:
                 "signals": [
                     "New supplier relationship with zero historical tenure",
                     f"Rapid disbursement velocity ({len(sup_txs)} payments in 7 days)",
-                    f"Total unverified outflow: ₹{total_outflow:,.0f}",
+                    f"Total unverified outflow: INR {total_outflow:,.0f}",
                     "Novel graph edge creation with high edge weight"
                 ],
                 "deterministic_metrics": {
@@ -107,7 +107,7 @@ class EvidenceEngine:
                 "difference": amt - 1200.0,
                 "discrepancy_amount": amt,
                 "signals": [
-                    f"Order amount ₹{amt:,.0f} exceeds SKU baseline by 70.8x",
+                    f"Order amount INR {amt:,.0f} exceeds SKU baseline by 70.8x",
                     "Amount deviation z-score = 8.42",
                     "Single order bulk quantity (50 units) on residential profile",
                     "High chargeback liability risk"
@@ -188,3 +188,4 @@ if __name__ == "__main__":
     print("Deterministic Evidence for SET-1029:")
     import json
     print(json.dumps(evidence, indent=2))
+

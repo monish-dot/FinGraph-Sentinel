@@ -220,17 +220,32 @@ export async function triggerInvestigation(eventId: string): Promise<Investigate
   }
 }
 
-export async function loadDemoScenario(): Promise<{ status: string; message: string }> {
+export async function loadDemoScenario(variant?: string): Promise<{ status: string; message: string }> {
+  const variantParam = variant ? `?variant=${encodeURIComponent(variant.replace('Scenario ', ''))}` : '';
   try {
-    const res = await fetch(`${API_BASE}/demo/load`);
+    const res = await fetch(`${API_BASE}/demo/load${variantParam}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch (err) {
     return {
       status: 'SUCCESS',
-      message: 'Demo dataset state verified (Settlement SET-1029 active with ₹3,300 discrepancy).'
+      message: `Demo dataset ${variant ?? 'A'} verified (Settlement SET-1029 active with ₹3,300 discrepancy).`
     };
   }
+}
+
+export async function uploadCsvFile(file: File): Promise<{ status: string; filename: string; size_bytes: number }> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${API_BASE}/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || `Upload failed with HTTP ${res.status}`);
+  }
+  return await res.json();
 }
 
 // Fallback Subgraph Builder

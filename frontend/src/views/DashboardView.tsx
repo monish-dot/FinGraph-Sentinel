@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import type { DashboardMetrics, AnomalyItem } from '../types';
 import { KPICards } from '../components/KPICards';
 import { DashboardCharts } from '../components/DashboardCharts';
@@ -26,14 +26,63 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   isLoading,
   onViewAnomalies,
 }) => {
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [refreshFlash, setRefreshFlash] = useState(false);
+
+  const handleRefresh = useCallback(() => {
+    onRefresh();
+    setLastRefreshed(new Date());
+    setRefreshFlash(true);
+    setTimeout(() => setRefreshFlash(false), 1200);
+  }, [onRefresh]);
+
+  const getTimeSince = () => {
+    const diff = Math.floor((Date.now() - lastRefreshed.getTime()) / 1000);
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    return `${Math.floor(diff / 3600)}h ago`;
+  };
+
   const flagship = anomalies.find(a => a.event_id === 'SET-1029');
   const hasDiscrepancy = metrics.settlement_discrepancy_amount > 0;
   const highPriority = anomalies.filter(a => a.priority_category === 'HIGH PRIORITY REVIEW');
   const actualSettlement = metrics.settlement_amount;
   const expectedSettlement = metrics.settlement_amount + metrics.settlement_discrepancy_amount;
 
+
   return (
     <div className="space-y-5">
+      {/* ── Top Controls Bar ────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
+        <div>
+          <h2 className="font-bold text-white text-base tracking-tight">
+            {metrics.seller_name || 'Apex Retailers (Amazon IN)'}
+          </h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Active Cycle: <span className="text-cyan-300 font-mono font-medium">{metrics.settlement_cycle}</span> · Real-time financial ledger & graph intelligence
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <span className="flex items-center gap-1.5 text-xs text-slate-400 font-mono bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-800">
+            <Clock className="w-3.5 h-3.5 text-slate-500" />
+            Updated {getTimeSince()}
+          </span>
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer ${
+              refreshFlash
+                ? 'border-emerald-500 bg-emerald-950/60 text-emerald-300 shadow-lg shadow-emerald-950/50'
+                : 'border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200 hover:border-slate-600'
+            }`}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <span>{isLoading ? 'Refreshing…' : 'Refresh Data'}</span>
+          </button>
+        </div>
+      </div>
+
       {/* ── Attention Banner ───────────────────────────────────────── */}
       {hasDiscrepancy && (
         <div className="flex items-start gap-4 px-5 py-4 rounded-xl border border-rose-700/60 bg-rose-950/30 backdrop-blur-sm">
@@ -50,20 +99,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               {' '}7 total anomalies detected (including <strong>{highPriority.length} High Priority</strong> events requiring immediate review).
             </p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={onRefresh}
-              className="p-2 rounded-lg hover:bg-rose-900/50 text-rose-300 hover:text-white transition-colors"
-              title="Refresh"
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
         </div>
       )}
 
       {/* ── KPI Cards ──────────────────────────────────────────────── */}
       <KPICards metrics={metrics} onViewAnomalies={onViewAnomalies || (() => {})} />
+
 
       {/* ── Charts ─────────────────────────────────────────────────── */}
       <DashboardCharts metrics={metrics} />

@@ -7,10 +7,11 @@ Deploys directly to AWS Lambda via Mangum handler and Amazon API Gateway.
 import os
 import sys
 import json
+import random as _random
 from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Query
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
@@ -83,6 +84,8 @@ def get_dashboard():
     """Returns top-level financial metrics and anomaly alert count."""
     try:
         kpis = data_service.get_dashboard_kpis()
+        anomalies = anomaly_detector.detect_anomalies()
+        kpis["active_anomalies_count"] = len(anomalies)
         return DashboardMetrics(**kpis)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to calculate dashboard KPIs: {str(e)}")
@@ -157,17 +160,27 @@ def run_investigation(req: InvestigateRequest):
         raise HTTPException(status_code=500, detail=f"Investigation failed: {str(e)}")
 
 @app.get("/demo/load", response_model=DemoLoadResponse)
-def load_demo_scenario():
+def load_demo_scenario(variant: str = Query(default="A", description="Demo variant label: A, B, C, D")):
     """
     Resets the workspace to the official deterministic ~10,000 row demo dataset
     with the 7 injected anomalies and Settlement SET-1029 discrepancy.
+    Each variant uses a different random seed to produce unique but consistent data.
     """
+    mode_file = os.path.join("data", "active_mode.json")
+    if os.path.exists(mode_file):
+        try:
+            os.remove(mode_file)
+        except Exception:
+            pass
+
+    VARIANT_SEEDS = {"A": 42, "B": 137, "C": 271, "D": 999}
+    seed = VARIANT_SEEDS.get(variant.upper(), 42)
     try:
-        summary = generate_dataset(output_dir="data", total_orders_target=8500)
+        summary = generate_dataset(output_dir="data", total_orders_target=8500 + seed % 500, seed_override=seed)
         graph_builder.load_and_build()
         return DemoLoadResponse(
             status="SUCCESS",
-            message="Official demo dataset loaded with 7 controlled anomalies.",
+            message=f"Demo Scenario {variant.upper()} loaded — {summary['orders_count']:,} orders, 7 controlled anomalies.",
             orders_count=summary["orders_count"],
             transactions_count=summary["transactions_count"],
             anomalies_count=summary["anomalies_injected"],
@@ -177,21 +190,40 @@ def load_demo_scenario():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load demo scenario: {str(e)}")
 
+
 @app.post("/upload")
 async def upload_csv_file(file: UploadFile = File(...)):
-    """Optional CSV upload handler for seller records."""
-    allowed = ["orders.csv", "transactions.csv", "refunds.csv", "returns.csv", "fees.csv", "settlements.csv"]
-    if file.filename not in allowed:
-        raise HTTPException(status_code=400, detail=f"Filename must be one of: {', '.join(allowed)}")
+    """CSV upload handler for standard seller CSVs or generic online market/stock datasets."""
+    if not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Uploaded file must be a .csv file.")
 
-    target_path = os.path.join("data", file.filename)
     contents = await file.read()
-    with open(target_path, "wb") as f:
-        f.write(contents)
+    standard_files = ["orders.csv", "transactions.csv", "refunds.csv", "returns.csv", "fees.csv", "settlements.csv"]
 
-    # Rebuild graph
-    graph_builder.load_and_build()
-    return {"status": "SUCCESS", "filename": file.filename, "size_bytes": len(contents)}
+    if file.filename.lower() in standard_files:
+        target_path = os.path.join("data", file.filename.lower())
+        with open(target_path, "wb") as f:
+            f.write(contents)
+        with open(os.path.join("data", "active_mode.json"), "w", encoding="utf-8") as mf:
+            json.dump({"mode": "CUSTOM", "source_file": file.filename, "uploaded_at": datetime.now().isoformat()}, mf)
+        graph_builder.load_and_build()
+        return {"status": "SUCCESS", "filename": file.filename, "size_bytes": len(contents), "type": "STANDARD"}
+    else:
+        # Generic online dataset (stock market, retail, crypto, ERP export)
+        target_path = os.path.join("data", f"uploaded_{file.filename}")
+        with open(target_path, "wb") as f:
+            f.write(contents)
+        ingest_result = data_service.ingest_generic_csv(target_path, original_filename=file.filename)
+        graph_builder.load_and_build()
+        return {
+            "status": "SUCCESS",
+            "filename": file.filename,
+            "size_bytes": len(contents),
+            "type": "GENERIC_DATASET",
+            "records_count": ingest_result.get("records_count", 0),
+            "gross_amount": ingest_result.get("gross_amount", 0)
+        }
+
 
 # -------------------------------------------------------------
 # AWS Lambda Handler (Mangum)

@@ -29,3 +29,63 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #4B5563;
 }
+
+/* Hardware-accelerated smooth scrolling */
+.smooth-scroll {
+  scroll-behavior: smooth !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* React Flow Dark Theme Overrides */
+.react-flow__controls {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  background-color: #1e293b !important;
+}
+
+.react-flow__controls-button {
+  background-color: #1e293b !important;
+  border-bottom: 1px solid #334155 !important;
+  color: #f1f5f9 !important;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 6px !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+.react-flow__controls-button:hover {
+  background-color: #0f172a !important;
+  color: #22d3ee !important;
+}
+
+.react-flow__controls-button svg {
+  fill: #f1f5f9 !important;
+  max-width: 14px !important;
+  max-height: 14px !important;
+}
+
+.react-flow__controls-button:hover svg {
+  fill: #22d3ee !important;
+}
+
+/* React Flow MiniMap Dark Theme Overrides */
+.react-flow__minimap {
+  background-color: #0b0f19 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+  cursor: grab !important;
+}
+
+.react-flow__minimap:active {
+  cursor: grabbing !important;
+}
+
+.react-flow__minimap-mask {
+  fill: rgba(15, 23, 42, 0.75) !important;
+  stroke: #06b6d4 !important;
+  stroke-width: 2px !important;
+}

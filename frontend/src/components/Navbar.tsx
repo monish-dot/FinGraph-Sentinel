@@ -1,13 +1,15 @@
-import React from 'react';
-import { ShieldAlert, Network, RefreshCw, CloudCheck, Sparkles, Database, FileSpreadsheet } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldAlert, Network, RefreshCw, Sparkles, FileSpreadsheet } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   anomaliesCount: number;
-  onLoadDemo: () => void;
+  onLoadDemo: (variant?: string) => void;
   isLoadingDemo: boolean;
 }
+
+const DEMO_VARIANTS = ['Scenario A', 'Scenario B', 'Scenario C', 'Scenario D'];
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
@@ -16,26 +18,53 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLoadDemo,
   isLoadingDemo
 }) => {
+  const [variantIdx, setVariantIdx] = useState(0);
+  const [lastVariantLabel, setLastVariantLabel] = useState<string | null>(null);
+  const [toastVisible, setToastVisible] = useState(false);
+
+  const handleLoadDemo = () => {
+    const next = (variantIdx + 1) % DEMO_VARIANTS.length;
+    setVariantIdx(next);
+    const label = DEMO_VARIANTS[next];
+    setLastVariantLabel(label);
+    onLoadDemo(label);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 3500);
+  };
+
   return (
     <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
+      {/* Demo variant toast */}
+      {toastVisible && lastVariantLabel && (
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-950 border border-cyan-700 text-cyan-200 text-xs shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+          Demo <strong className="text-cyan-300">{lastVariantLabel}</strong> loaded
+        </div>
+      )}
+
       {/* Top tier brand bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/20 text-white">
+        {/* ─── Logo → Navigates to Dashboard ─── */}
+        <button
+          onClick={() => setActiveTab('dashboard')}
+          className="flex items-center space-x-3 cursor-pointer group text-left"
+          title="Go to Dashboard"
+        >
+          <div className="p-2 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/20 text-white group-hover:shadow-cyan-500/40 transition-shadow">
             <Network className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-bold text-lg tracking-tight text-white">FinGraph Sentinel</span>
+              <span className="font-bold text-lg tracking-tight text-white group-hover:text-cyan-300 transition-colors">FinGraph Sentinel</span>
               <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/60">
                 AWS Ship It 2026
               </span>
             </div>
             <p className="text-xs text-slate-400">
-              “See the relationship. Understand the anomaly. Decide what to review.”
+              "See the relationship. Understand the anomaly. Decide what to review."
             </p>
           </div>
-        </div>
+        </button>
 
         {/* Status badges & Demo Action */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -52,15 +81,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="font-mono text-slate-400">Strands Agent</span>
           </div>
 
-          {/* Load Demo Scenario Button */}
+          {/* Load Demo Scenario Button — cycles through variants */}
           <button
-            onClick={onLoadDemo}
+            onClick={handleLoadDemo}
             disabled={isLoadingDemo}
             className="flex items-center space-x-2 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-medium text-xs shadow-md shadow-cyan-500/20 active:scale-95 transition-all disabled:opacity-60"
-            title="Reloads deterministic 10,000 transaction dataset with Settlement SET-1029 anomaly"
+            title="Loads a new demo dataset variant with shuffled timestamps and amounts"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoadingDemo ? 'animate-spin' : ''}`} />
-            <span>{isLoadingDemo ? 'Loading Demo...' : 'Load Demo Scenario'}</span>
+            <span>{isLoadingDemo ? 'Loading...' : `Load Demo ${DEMO_VARIANTS[(variantIdx + 1) % DEMO_VARIANTS.length]}`}</span>
           </button>
         </div>
       </div>

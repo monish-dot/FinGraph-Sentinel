@@ -1,54 +1,85 @@
-# FinGraph Sentinel 🛡️
+<div align="center">
+
+# 🛡️ FinGraph Sentinel
 ### *Autonomous Financial Anomaly Detection & AI Decision-Support for E-Commerce Marketplaces*
 
-[![AWS Bedrock](https://img.shields.io/badge/AWS-Amazon%20Bedrock-FF9900?logo=amazon-aws)](https://aws.amazon.com/bedrock/)
-[![Strands Agents](https://img.shields.io/badge/Agent-Strands%20SDK-6366F1)](https://github.com/strands-ai)
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20%2B%20Mangum-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
-[![React Flow](https://img.shields.io/badge/Frontend-React%20%2B%20Tailwind%20%2B%20XYFlow-61DAFB?logo=react)](https://reactflow.dev/)
-[![Evaluation F1](https://img.shields.io/badge/F1--Score-1.0000%20(100%25)-10B981)](#-evaluation--benchmark-results)
+[![AWS Bedrock](https://img.shields.io/badge/AWS-Amazon%20Bedrock-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/bedrock/)
+[![Strands Agents](https://img.shields.io/badge/Agent-Strands%20SDK-6366F1?style=for-the-badge&logo=openai&logoColor=white)](https://github.com/strands-ai)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20%2B%20Mangum-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React 19](https://img.shields.io/badge/Frontend-React%2019%20%2B%20Tailwind-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![React Flow](https://img.shields.io/badge/Graph-XYFlow%20%2F%20React%20Flow-FF0072?style=for-the-badge)](https://reactflow.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](./LICENSE)
+[![F1-Score](https://img.shields.io/badge/F1--Score-1.0000%20(100%25)-10B981?style=for-the-badge)](#-evaluation--benchmark-results)
 
-> **"See the relationship. Understand the anomaly. Decide what to review."**
-> FinGraph Sentinel was engineered for the **First Commit 2026 Hackathon ("SHIP IT" Track)**.
+**Engineered for the AWS Ship It / First Commit Hackathon 2026**
+
+> *"See the relationship. Understand the anomaly. Decide what to review."*
+
+<br/>
+
+<img src="docs/assets/dashboard_preview.png" alt="FinGraph Sentinel Dashboard" width="100%" style="border-radius: 10px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5);" />
+
+</div>
 
 ---
 
 ## 📑 Table of Contents
-1. [Executive Summary & Problem Statement](#-executive-summary)
-2. [Key Innovations & Guardrails](#-key-innovations--guardrails)
-3. [End-to-End Architecture](#-end-to-end-architecture)
-4. [Flagship Investigation Scenario (SET-1029)](#-flagship-investigation-scenario-set-1029)
-5. [Evaluation & Benchmark Results](#-evaluation--benchmark-results)
-6. [Tool Registry (The 11 Verified Tools)](#-tool-registry-the-11-verified-tools)
-7. [Local Quickstart & Execution Guide](#-local-quickstart--execution-guide)
-8. [AWS Cloud Deployment Guide](#-aws-cloud-deployment-guide)
+1. [Executive Summary](#-executive-summary)
+2. [Key Innovations & Safety Guardrails](#-key-innovations--safety-guardrails)
+3. [Core Feature Suite](#-core-feature-suite)
+4. [System Architecture](#-system-architecture)
+5. [Flagship Case Study: SET-1029](#-flagship-case-study-set-1029)
+6. [Benchmark & Evaluation Metrics](#-benchmark--evaluation-metrics)
+7. [The 11 Verified Deterministic Tools](#-the-11-verified-deterministic-tools)
+8. [Local Quickstart Guide](#-local-quickstart-guide)
+9. [AWS Cloud Deployment](#-aws-cloud-deployment)
+10. [Repository Structure](#-repository-structure)
+11. [Author & Acknowledgments](#-author--acknowledgments)
 
 ---
 
 ## 🎯 Executive Summary
 
-Online marketplace sellers (Amazon, Flipkart, Shopify) process tens of thousands of customer orders, platform referral commissions, FBA fulfillment charges, returns, and reverse logistics fees every settlement cycle.
+E-commerce marketplace sellers on platforms such as Amazon, Flipkart, and Shopify reconcile tens of thousands of customer orders, platform referral commissions, FBA fulfillment charges, returns, and reverse logistics fees every settlement cycle.
 
-### The Real-World Seller Pain Points:
-1. **Black Box Payouts:** Sellers receive consolidated bi-weekly payouts without intuitive itemized attribution when numbers do not reconcile.
-2. **Alert Fatigue:** Existing rule-based alerting generates dozens of false positives for seasonal volume surges while missing coordinated multi-entity leakage.
-3. **Delayed Root-Cause Discovery:** Investigating an unannounced ₹3,300 deduction manually takes hours of cross-referencing ledger tables across CSV exports.
+### The Real-World Seller Problem:
+- **Black-Box Payouts:** Sellers receive consolidated bi-weekly payouts without intuitive itemized attribution when numbers fail to reconcile.
+- **Alert Fatigue:** Existing rule-based alerting generates dozens of false positives for seasonal volume surges while missing coordinated multi-entity leakage.
+- **Delayed Root-Cause Discovery:** Investigating an unannounced ₹3,300 deduction manually takes hours of cross-referencing ledger tables across disjointed CSV exports.
 
-**FinGraph Sentinel** solves this by unifying marketplace event streams into a **temporal heterogeneous property graph**, surfacing coordinated deviations using a **hybrid multi-signal scoring model**, and providing instant, deterministic, and safe root-cause explanations powered by an **Amazon Bedrock AI Agent** built with the **Strands Agents SDK**.
+### The FinGraph Sentinel Solution:
+**FinGraph Sentinel** unifies fragmented marketplace event streams into a **temporal heterogeneous property graph**, identifies coordinated deviations using a **hybrid multi-signal scoring engine**, and provides instant, grounded root-cause explanations powered by an **Amazon Bedrock Strands Agent**.
 
 ---
 
-## 🛡️ Key Innovations & Guardrails
+## 🛡️ Key Innovations & Safety Guardrails
+
+FinGraph Sentinel is built with strict production-grade financial safeguards adhering to the core tenets of AI-assisted financial auditing:
 
 | Principle | Traditional Approaches | FinGraph Sentinel |
 | :--- | :--- | :--- |
-| **Anomaly Intelligence** | Static threshold / 3-sigma isolated amounts | **6-signal hybrid model** (temporal clustering, graph degree shifts, return spikes) |
+| **Anomaly Intelligence** | Static threshold / 3-sigma isolated amounts | **6-signal hybrid model** (temporal clustering, graph degree shifts, return surges) |
 | **Arithmetic Integrity** | LLMs hallucinate calculations | **Separation of Concerns:** Zero agent math. Arithmetic is 100% deterministic via Python tools. |
-| **Legal / Compliance** | Accusatory alerts ("Fraud detected!") | **Decision-Support Framing:** Factual deviations reported without accusatory verdicts. |
-| **System Security** | Vulnerable write tools | **Strict Read-Only Agent:** Zero tools to alter balances or execute transfers. |
+| **Legal / Compliance** | Accusatory alerts (*"Fraud detected!"*) | **Strict Decision-Support Framing:** Factual deviations reported without legal accusations. |
+| **System Security** | Dangerous write access | **Strict Read-Only Agent:** Zero tools to alter balances or execute fund transfers. |
+| **Audit Traceability** | Unexplained AI outputs | **Full Execution Trace:** Every Python tool call, latency, and parameter is auditable. |
 
 ---
 
-## 🏗️ End-to-End Architecture
+## ⚡ Core Feature Suite
+
+- 📊 **Financial Health & Reconciliation Dashboard:** Live monitoring of Gross Sales, Platform Fees, Customer Refunds, Net Expected Accrual, and Disbursed Settlements with active discrepancy alerting.
+- 📉 **15-Day Cash Flow & Refund Trajectory:** Interactive dual-axis velocity charts with real-time toggle overlays highlighting temporal refund surges.
+- 🍩 **Revenue & Fee Breakdown Allocation:** Visual donut breakdowns categorizing GMV share and itemized marketplace commission/storage fees.
+- 🤖 **Agentic Root-Cause Investigation Drawer:** One-click automated root-cause analysis powered by Amazon Bedrock (Claude 3.5 Sonnet / Amazon Nova) with live step-by-step tool execution telemetry.
+- 🕸️ **Interactive Temporal Graph Explorer:** Multi-hop graph visualization powered by `@xyflow/react` and Dagre auto-layout, exposing multi-entity connections between products, orders, customers, and settlement payouts.
+- 📄 **One-Click Audit Log Export:** Export comprehensive investigation reports as clean, high-density PDFs or CSV files complete with executive summaries, evidence signals, and seller review checklists.
+- 📥 **Dynamic Multi-CSV Ingestion:** Ingest custom marketplace exports (orders, transactions, refunds, returns, fees, settlements) with automatic anomaly re-scoring and graph re-indexing.
+- 🎲 **Interactive Demo Scenarios:** Built-in scenario loader to effortlessly demonstrate system behavior across varied financial anomaly profiles.
+
+---
+
+## 🏗️ System Architecture
 
 ```mermaid
 flowchart TD
@@ -71,9 +102,9 @@ flowchart TD
         TOOLS["Verified Tool Registry<br/>(11 Deterministic Functions)"]
     end
 
-    subgraph API & Presentation ["Presentation Layer"]
+    subgraph Presentation Layer ["Presentation & Client Layer"]
         API["FastAPI + Mangum<br/>AWS Lambda & API Gateway"]
-        UI["React 19 + Tailwind v4 + @xyflow/react<br/>AWS Amplify Hosting"]
+        UI["React 19 + Tailwind CSS + @xyflow/react<br/>AWS Amplify Hosting"]
     end
 
     S3 --> DDB
@@ -90,105 +121,158 @@ flowchart TD
 
 ---
 
-## 🔍 Flagship Investigation Scenario (SET-1029)
+## 🔍 Flagship Case Study: SET-1029
 
-FinGraph Sentinel includes a pre-injected flagship case study ready for live demo evaluation:
+FinGraph Sentinel includes pre-injected real-world anomaly scenarios ready for immediate live evaluation:
 
 * **Cycle Period:** Sep 01 – Sep 15, 2026
-* **Expected Settlement:** **₹94,500** ($\text{Gross Sales } ₹124,500 - \text{Fees } ₹18,600 - \text{Refunds } ₹11,400$)
+* **Expected Settlement:** **₹94,500** (`Gross Sales ₹1,24,500` - `Fees ₹18,600` - `Refunds ₹11,400`)
 * **Actual Payout Record:** **₹91,200**
-* **Net Cash Discrepancy:** **₹3,300 deduction**
-* **Underlying Anomaly:** Product `P17` experienced a **2.7× refund surge** within 72 hours of the settlement cutoff window (orders `ORD-P17-1`, `ORD-P17-2`, `ORD-P17-3` at ₹1,100 each).
-* **Investigation Output:** The Strands Agent queries `get_settlement`, `calculate_expected_settlement`, `get_anomaly_evidence`, and `get_refund_history` to produce a grounded decision-support report in under 2 seconds.
+* **Net Cash Discrepancy:** **-₹3,300 deduction**
+* **Underlying Anomaly:** Product `P17` experienced a **2.7× refund surge** within 72 hours of the settlement cutoff window (`ORD-P17-1`, `ORD-P17-2`, `ORD-P17-3` at ₹1,100 each).
+* **Investigation Output:** The Strands Agent queries `get_settlement`, `calculate_expected_settlement`, `get_anomaly_evidence`, and `get_refund_history` to produce an audited decision-support report in **under 2 seconds**.
 
 ---
 
-## 📊 Evaluation & Benchmark Results
+## 📊 Benchmark & Evaluation Metrics
 
-FinGraph Sentinel was evaluated against the synthetic marketplace dataset (~10,000 transactions with 7 injected ground-truth anomalies):
+FinGraph Sentinel was rigorously benchmarked on a synthetic marketplace dataset of **~10,000 transactions** with 7 injected ground-truth anomalies:
 
 | Metric | Baseline (Amount-Only 3-Sigma) | FinGraph Sentinel (Hybrid Graph + Temporal) | Improvement |
 | :--- | :---: | :---: | :---: |
 | **Precision** | 1.72% | **100.00%** | **+98.28%** |
 | **Recall** | 28.57% | **100.00%** | **+71.43%** |
 | **F1 Score** | 0.0325 | **1.0000** | **30.7× Improvement** |
-| **False Positive Rate** | 0.6698% | **0.0000%** | Zero False Alarms |
-| **Execution Latency** | < 10ms | **18ms** | Real-Time Capable |
+| **False Positive Rate** | 0.6698% | **0.0000%** | **Zero False Alarms** |
+| **Execution Latency** | < 10ms | **18ms** | **Real-Time Capable** |
 
-*Run benchmark locally anytime:*
+*Run the benchmark locally anytime:*
 ```bash
 python intelligence/evaluation.py
 ```
 
 ---
 
-## 🧰 Tool Registry (The 11 Verified Tools)
+## 🧰 The 11 Verified Deterministic Tools
 
-All financial data access by the AI agent is strictly mediated through 11 deterministic tools:
+All financial ledger interactions are governed by 11 deterministic, read-only Python tools:
 
-1. `get_transaction(transaction_id)`
-2. `get_order_history(order_id | product_id)`
-3. `get_product_history(product_id)`
-4. `get_supplier_history(supplier_id)`
-5. `get_refund_history(product_id | order_id)`
-6. `get_return_history(product_id | order_id)`
-7. `get_fee_summary(period)`
-8. `get_settlement(settlement_id)`
-9. `calculate_expected_settlement(settlement_id)`
-10. `get_anomaly_evidence(event_id)`
-11. `get_financial_summary(period)`
+| # | Tool Function | Input Parameters | Purpose |
+|---|---|---|---|
+| 1 | `get_transaction` | `transaction_id: str` | Retrieves timestamp, gross sum, payment rail, and entity linkages. |
+| 2 | `get_order_history` | `order_id: str` \| `product_id: str` | Returns customer order records, pricing, quantities, and dates. |
+| 3 | `get_product_history` | `product_id: str` | Fetches historical sales volume, return rate, and margin profiles. |
+| 4 | `get_supplier_history` | `supplier_id: str` | Analyzes supplier age, payout sums, and order frequency. |
+| 5 | `get_refund_history` | `product_id: str` \| `order_id: str` | Returns timestamped refund entries and documented defect reasons. |
+| 6 | `get_return_history` | `product_id: str` \| `order_id: str` | Returns return authorizations and physical logistics transit states. |
+| 7 | `get_fee_summary` | `period: str` | Itemizes platform referral commissions, FBA fees, and storage deductions. |
+| 8 | `get_settlement` | `settlement_id: str` | Returns official marketplace payout ledger entries. |
+| 9 | `calculate_expected_settlement` | `settlement_id: str` | Deterministic recalculation: `Gross - Fees - Refunds = Expected`. |
+| 10 | `get_anomaly_evidence` | `event_id: str` | Fetches structured, immutable evidence metrics from `evidence_engine.py`. |
+| 11 | `get_financial_summary` | `period: str` | Provides macro cycle aggregates (GMV, net margin, settlement delta). |
 
 ---
 
-## 🚀 Local Quickstart & Execution Guide
+## 🚀 Local Quickstart Guide
 
 ### Prerequisites
 - Python 3.10+
 - Node.js 18+ and npm
 
-### 1. Start the FastAPI Backend
+### 1. Clone the Repository
 ```bash
-# From repository root
-pip install -r backend/requirements.txt
-python backend/app.py
-# Backend runs at http://localhost:8000
-# OpenAPI Docs: http://localhost:8000/docs
+git clone https://github.com/mohitmadhav06/FinGraph-Sentinel.git
+cd FinGraph-Sentinel
 ```
 
-### 2. Start the React Frontend
+### 2. Launch FastAPI Backend
+```bash
+# Install backend dependencies
+pip install -r backend/requirements.txt
+
+# Start backend server
+python backend/app.py
+```
+- API Base: `http://localhost:8000`
+- Interactive Swagger Docs: `http://localhost:8000/docs`
+
+### 3. Launch React Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
-# Frontend runs at http://localhost:5173
 ```
+- Dashboard UI: `http://localhost:5173`
 
-### 3. Run Automated Tests
+### 4. Run Automated Test Suite
 ```bash
 pytest backend/tests/ -v
-# 12 passing unit & integration tests
 ```
 
 ---
 
-## ☁️ AWS Cloud Deployment Guide
+## ☁️ AWS Cloud Deployment
 
-FinGraph Sentinel is architected as an AWS cloud-native application:
+FinGraph Sentinel is designed for AWS serverless deployment:
 
-1. **Deploy Backend Infrastructure (AWS SAM):**
-   ```bash
-   cd infrastructure
-   sam build
-   sam deploy --guided
-   ```
-   *Provisions: AWS Lambda (FastAPI/Mangum), Amazon API Gateway HTTP API, 3 DynamoDB Tables, S3 Bucket, and IAM permissions for Amazon Bedrock.*
+### 1. Backend Deployment (AWS SAM)
+```bash
+cd infrastructure
+sam build
+sam deploy --guided
+```
+*Provisions:* AWS Lambda (FastAPI / Mangum), Amazon API Gateway HTTP API, DynamoDB Tables, Amazon S3 Bucket, and IAM permissions for Amazon Bedrock.
 
-2. **Deploy Frontend (AWS Amplify):**
-   - Connect repository to AWS Amplify Console.
-   - Amplify uses the provided [`amplify.yml`](./amplify.yml) build specification.
-   - Configure environment variable `VITE_API_BASE_URL` with your API Gateway endpoint.
+### 2. Frontend Deployment (AWS Amplify)
+- Connect repository to AWS Amplify Console.
+- Uses standard configuration defined in [`amplify.yml`](./amplify.yml).
+- Set `VITE_API_BASE_URL` to your API Gateway endpoint.
+
+> **💡 Offline Evaluation Fallback:**
+> FinGraph Sentinel includes a zero-dependency local simulation mode. If running without active AWS credentials or outside AWS environments, the system automatically uses local deterministic evidence synthesis while maintaining 100% fidelity to the Strands Agent output contracts.
 
 ---
 
-## 🏆 Hackathon Judges & Evaluators Note
-FinGraph Sentinel includes a **built-in zero-dependency offline fallback mode**. If running without active AWS credentials or outside AWS environments, the system seamlessly uses local deterministic evidence synthesis while maintaining 100% fidelity to the Strands Agent output contracts.
+## 📁 Repository Structure
+
+```
+FinGraph-Sentinel/
+├── .github/                 # Workflows & templates
+├── agent/                   # Strands Agent orchestrator & verified tool registry
+│   └── agent.py             # Bedrock agent runtime & deterministic fallbacks
+├── backend/                 # FastAPI server & routes
+│   ├── app.py               # Main entrypoint & REST endpoints
+│   ├── requirements.txt     # Python dependencies
+│   └── tests/               # Pytest unit & integration test suite
+├── data/                    # Synthetic marketplace ledgers & ground truth
+├── docs/                    # Architectural assets & preview screenshots
+│   └── assets/              # High-res UI previews
+├── frontend/                # React 19 + Tailwind CSS + XYFlow dashboard
+│   ├── src/components/      # Modular UI widgets (Charts, KPIs, Graph, Drawer)
+│   ├── src/views/           # Dashboard, Anomalies, and Ingestion views
+│   └── package.json         # Frontend dependencies
+├── infrastructure/          # AWS SAM infrastructure as code (template.yaml)
+├── intelligence/            # Multi-signal graph & ML anomaly detection engine
+│   ├── anomaly_detector.py  # Hybrid scorer (Isolation Forest + Z-score)
+│   ├── dataset_generator.py # 10k-event realistic generator
+│   ├── evidence_engine.py   # Deterministic evidence extractor
+│   ├── features.py          # Temporal & relational feature extraction
+│   └── graph_builder.py     # NetworkX property graph builder
+├── AGENTS.md                # AI Agent architecture specification & contracts
+├── LICENSE                  # MIT License
+└── README.md                # Project documentation
+```
+
+---
+
+## 👨‍💻 Author & Acknowledgments
+
+- **Lead Developer:** [Mohit Madhav](https://github.com/mohitmadhav06)
+- **Track:** First Commit 2026 Hackathon ("SHIP IT" Track)
+- **Built with:** Amazon Bedrock, Strands Agents SDK, FastAPI, React 19, Tailwind CSS, XYFlow, NetworkX, and Scikit-Learn.
+
+---
+
+<div align="center">
+  <b>FinGraph Sentinel</b> — Giving sellers complete clarity over every rupee of their payout.
+</div>

@@ -17,10 +17,11 @@ random.seed(RANDOM_SEED)
 SELLER_ID = "SEL-001"
 SELLER_NAME = "Apex Retailers (Amazon IN)"
 
-def generate_dataset(output_dir: str = "data", total_orders_target: int = 8500) -> Dict[str, Any]:
+def generate_dataset(output_dir: str = "data", total_orders_target: int = 8500, seed_override: int = None) -> Dict[str, Any]:
     """Generates synthetic dataset and writes CSV files to output_dir."""
     os.makedirs(output_dir, exist_ok=True)
-    random.seed(RANDOM_SEED)
+    effective_seed = seed_override if seed_override is not None else RANDOM_SEED
+    random.seed(effective_seed)
 
     # Base date range: Aug 01, 2026 to Sep 20, 2026 (~50 days)
     start_date = datetime(2026, 8, 1, 9, 0, 0)

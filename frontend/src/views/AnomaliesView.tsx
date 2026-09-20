@@ -3,7 +3,7 @@ import { AnomalyItem, InvestigateResponse } from '../types';
 import { AnomalyTable } from '../components/AnomalyTable';
 import { InvestigationDrawer } from '../components/InvestigationDrawer';
 import { triggerInvestigation } from '../services/api';
-import { ShieldAlert, RefreshCw } from 'lucide-react';
+import { ShieldAlert, RefreshCw, Clock } from 'lucide-react';
 
 interface AnomaliesViewProps {
   anomalies: AnomalyItem[];
@@ -21,6 +21,8 @@ export const AnomaliesView: React.FC<AnomaliesViewProps> = ({
   const [selectedAnomaly, setSelectedAnomaly] = useState<AnomalyItem | null>(null);
   const [isInvestigating, setIsInvestigating] = useState<string | null>(null);
   const [investigationResult, setInvestigationResult] = useState<InvestigateResponse | null>(null);
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [refreshFlash, setRefreshFlash] = useState(false);
 
   const handleInvestigate = async (anomaly: AnomalyItem) => {
     setSelectedAnomaly(anomaly);
@@ -47,6 +49,21 @@ export const AnomaliesView: React.FC<AnomaliesViewProps> = ({
     setIsInvestigating(null);
   };
 
+  const handleRefresh = () => {
+    onRefresh();
+    setLastRefreshed(new Date());
+    setRefreshFlash(true);
+    setTimeout(() => setRefreshFlash(false), 1200);
+  };
+
+  // Human-readable "N seconds ago"
+  const getTimeSince = () => {
+    const diff = Math.floor((Date.now() - lastRefreshed.getTime()) / 1000);
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    return `${Math.floor(diff / 3600)}h ago`;
+  };
+
   return (
     <div className="space-y-4">
       {/* View Header */}
@@ -62,14 +79,24 @@ export const AnomaliesView: React.FC<AnomaliesViewProps> = ({
             </p>
           </div>
         </div>
-        <button
-          onClick={onRefresh}
-          disabled={isLoading}
-          className="flex items-center gap-2 px-3 py-2 text-xs rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors disabled:opacity-50"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1 text-[10px] text-slate-500 font-mono">
+            <Clock className="w-3 h-3" />
+            Updated {getTimeSince()}
+          </span>
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className={`flex items-center gap-2 px-3 py-2 text-xs rounded-lg border transition-all disabled:opacity-50 ${
+              refreshFlash
+                ? 'border-emerald-600 bg-emerald-950/30 text-emerald-300'
+                : 'border-slate-700 text-slate-300 hover:bg-slate-800'
+            }`}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Priority Summary Chips */}
