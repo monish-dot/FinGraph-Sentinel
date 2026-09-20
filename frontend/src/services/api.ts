@@ -4,11 +4,11 @@ const API_BASE = '/api';
 
 // Fallback demo dataset for instant zero-latency loading and offline resilience
 const FALLBACK_DASHBOARD: DashboardMetrics = {
-  gross_sales: 1245000.0,
-  platform_fees: 186750.0,
-  refunds: 48200.0,
-  returns: 18500.0,
-  net_revenue: 1010050.0,
+  gross_sales: 124500.0,
+  platform_fees: 18600.0,
+  refunds: 11400.0,
+  returns: 3300.0,
+  net_revenue: 94500.0,
   settlement_amount: 91200.0,
   active_anomalies_count: 7,
   seller_name: 'Apex Retailers (Amazon IN)',
@@ -28,7 +28,7 @@ const FALLBACK_ANOMALIES: AnomalyItem[] = [
     discrepancy_amount: 3300.0,
     expected_amount: 94500.0,
     actual_amount: 91200.0,
-    priority_score: 0.82,
+    priority_score: 0.89,
     priority_category: 'HIGH PRIORITY REVIEW',
     signals: [
       'refund activity increased 2.7x',
@@ -52,15 +52,15 @@ const FALLBACK_ANOMALIES: AnomalyItem[] = [
     category: 'UNUSUAL_TRANSACTION_AMOUNT',
     entity_id: 'TX-8291',
     entity_type: 'TRANSACTION',
-    title: 'Extreme Outlier Order Amount (TX-8291)',
-    discrepancy_amount: 85000.0,
-    priority_score: 0.83,
+    title: 'Outlier Order Amount (TX-8291)',
+    discrepancy_amount: 8500.0,
+    priority_score: 0.84,
     priority_category: 'HIGH PRIORITY REVIEW',
     signals: [
-      'Order amount ₹85,000 exceeds SKU baseline by 70.8x',
-      'Amount deviation z-score = 8.42',
-      'Single order bulk quantity (50 units) on residential profile',
-      'High chargeback liability risk'
+      'Order amount ₹8,500 exceeds SKU baseline by 7.1x',
+      'Amount deviation z-score = 5.24',
+      'Single order bulk quantity (5 units) on residential profile',
+      'Elevated chargeback liability risk'
     ],
     timestamp: '2026-09-13 11:45:00',
     feature_breakdown: {

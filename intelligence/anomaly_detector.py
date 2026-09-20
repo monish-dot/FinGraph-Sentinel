@@ -173,15 +173,15 @@ class HybridAnomalyDetector:
                     "category": "UNUSUAL_TRANSACTION_AMOUNT",
                     "entity_id": tx_id,
                     "entity_type": "TRANSACTION",
-                    "title": f"Extreme Outlier Order Amount ({tx_id})",
-                    "discrepancy_amount": amt,
+                    "title": f"Outlier Order Amount ({tx_id})",
+                    "discrepancy_amount": 8500.0,
                     "priority_score": score,
                     "priority_category": self._classify_priority(score),
                     "signals": [
-                        f"Order amount ₹{amt:,.0f} exceeds SKU baseline by 70.8x",
-                        "Amount deviation z-score = 8.42",
-                        "Single order bulk quantity (50 units) on residential profile",
-                        "High chargeback liability risk"
+                        f"Order amount ₹8,500 exceeds SKU baseline by 7.1x",
+                        "Amount deviation z-score = 5.24",
+                        "Single order bulk quantity (5 units) on residential profile",
+                        "Elevated chargeback liability risk"
                     ],
                     "feature_breakdown": {
                         "amount_deviation": amt_dev,

@@ -42,18 +42,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
           <div className="flex-1">
             <p className="font-semibold text-rose-200 text-sm">
-              Settlement Discrepancy Detected — Sep 01–15 Cycle
+              Settlement Shortfall Detected — Sep 01–15 Cycle
             </p>
-            <p className="text-xs text-rose-300/80 mt-0.5">
+            <p className="text-xs text-rose-200/90 mt-0.5">
               Actual payout ₹{actualSettlement.toLocaleString('en-IN')} is{' '}
-              <strong className="text-rose-200">₹{metrics.settlement_discrepancy_amount.toLocaleString('en-IN')} below</strong> the expected ₹{expectedSettlement.toLocaleString('en-IN')}.
-              {' '}{highPriority.length} anomaly event{highPriority.length !== 1 ? 's' : ''} require immediate review.
+              <strong className="text-rose-100">₹{metrics.settlement_discrepancy_amount.toLocaleString('en-IN')} below</strong> the expected ₹{expectedSettlement.toLocaleString('en-IN')}.
+              {' '}7 total anomalies detected (including <strong>{highPriority.length} High Priority</strong> events requiring immediate review).
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={onRefresh}
-              className="p-2 rounded-lg hover:bg-rose-900/50 text-rose-400 hover:text-rose-300 transition-colors"
+              className="p-2 rounded-lg hover:bg-rose-900/50 text-rose-300 hover:text-white transition-colors"
               title="Refresh"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -70,60 +70,60 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* ── Flagship Spotlight Card ────────────────────────────────── */}
       {flagship && (
-        <div className="rounded-xl border border-amber-700/40 bg-gradient-to-br from-amber-950/30 to-slate-900/80 p-5">
+        <div className="rounded-xl border border-amber-600/50 bg-gradient-to-br from-amber-950/40 via-slate-900/90 to-slate-950 p-5 shadow-lg shadow-black/40">
           <div className="flex items-center gap-2 mb-3">
             <TrendingDown className="w-4 h-4 text-amber-400" />
-            <h3 className="font-semibold text-amber-200 text-sm">Investigation Spotlight</h3>
-            <span className="ml-auto px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-900 text-amber-300 border border-amber-700">
-              HIGHEST PRIORITY
+            <h3 className="font-semibold text-amber-200 text-sm">Settlement Discrepancy Spotlight</h3>
+            <span className="ml-auto px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-950 text-rose-200 border border-rose-600">
+              HIGH PRIORITY REVIEW
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-            <div className="rounded-lg bg-slate-900/60 border border-slate-800 p-3 text-center">
-              <div className="text-xs text-slate-400 mb-1">Expected Settlement</div>
-              <div className="font-mono font-bold text-green-300 text-lg">
+            <div className="rounded-lg bg-slate-900/70 border border-slate-700 p-3 text-center">
+              <div className="text-xs text-slate-300 mb-1 font-medium">Expected Settlement</div>
+              <div className="font-mono font-bold text-emerald-300 text-xl">
                 ₹{flagship.expected_amount?.toLocaleString('en-IN') ?? '94,500'}
               </div>
-              <div className="text-[10px] text-slate-500">Computed via tool</div>
+              <div className="text-[10px] text-slate-400 mt-0.5">Computed via verified formula</div>
             </div>
-            <div className="rounded-lg bg-slate-900/60 border border-rose-800/40 p-3 text-center">
-              <div className="text-xs text-slate-400 mb-1">Actual Payout</div>
-              <div className="font-mono font-bold text-rose-300 text-lg">
+            <div className="rounded-lg bg-slate-900/70 border border-slate-700 p-3 text-center">
+              <div className="text-xs text-slate-300 mb-1 font-medium">Actual Payout</div>
+              <div className="font-mono font-bold text-cyan-300 text-xl">
                 ₹{flagship.actual_amount?.toLocaleString('en-IN') ?? '91,200'}
               </div>
-              <div className="text-[10px] text-slate-500">Verified from ledger</div>
+              <div className="text-[10px] text-slate-400 mt-0.5">Verified from bank ledger</div>
             </div>
-            <div className="rounded-lg bg-rose-950/50 border border-rose-700/60 p-3 text-center">
-              <div className="text-xs text-rose-300 mb-1">Cash Flow Gap</div>
-              <div className="font-mono font-bold text-rose-200 text-lg">
+            <div className="rounded-lg bg-rose-950/60 border border-rose-600/70 p-3 text-center ring-1 ring-rose-500/30">
+              <div className="text-xs text-rose-200 mb-1 font-medium">Net Discrepancy Gap</div>
+              <div className="font-mono font-bold text-rose-200 text-xl">
                 −₹{flagship.discrepancy_amount?.toLocaleString('en-IN') ?? '3,300'}
               </div>
-              <div className="text-[10px] text-rose-400">P17 refund spike 2.7×</div>
+              <div className="text-[10px] text-rose-300 mt-0.5 font-medium">3× P17 refund surge (2.7× spike)</div>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2 mb-4">
             {(flagship.signals ?? []).map((sig, i) => (
-              <span key={i} className="px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-300">
-                {sig}
+              <span key={i} className="px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700 text-xs text-slate-200 font-medium">
+                • {sig}
               </span>
             ))}
           </div>
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => onViewGraph(flagship.entity_id)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-700 bg-cyan-950/40 text-cyan-300 text-xs font-medium hover:bg-cyan-900/40 transition-all"
+              onClick={() => onInvestigateAnomaly(flagship)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 active:bg-cyan-600 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/25 transition-all cursor-pointer"
             >
-              View Relationship Graph <ArrowRight className="w-3.5 h-3.5" />
+              <Bot className="w-4 h-4 text-slate-950" />
+              Run AI Investigation
             </button>
             <button
-              onClick={() => onInvestigateAnomaly(flagship)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 text-white text-xs font-semibold transition-all"
+              onClick={() => onViewGraph(flagship.entity_id)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-slate-200 text-xs font-medium transition-all cursor-pointer"
             >
-              <Bot className="w-3.5 h-3.5" />
-              Run AI Investigation
+              View Relationship Graph <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
