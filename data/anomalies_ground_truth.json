@@ -1,0 +1,111 @@
+[
+  {
+    "anomaly_id": "ANOM-SET-1029",
+    "event_id": "SET-1029",
+    "category": "SETTLEMENT_MISMATCH",
+    "entity_id": "SET-1029",
+    "related_product": "P17",
+    "expected_amount": 94500.0,
+    "actual_amount": 91200.0,
+    "difference": 3300.0,
+    "priority_score": 0.89,
+    "priority": "HIGH",
+    "signals": [
+      "refund activity increased 2.7x",
+      "Product P17 contributes most of the increase",
+      "related transactions cluster within 72 hours",
+      "settlement differs from historical baseline"
+    ],
+    "description": "Settlement #1029 discrepancy of \u20b93,300 attributed to 3 concentrated customer refunds on Product P17."
+  },
+  {
+    "anomaly_id": "ANOM-SUP-NOVEL",
+    "event_id": "SUP-031",
+    "category": "NEW_SUPPLIER_RELATIONSHIP",
+    "entity_id": "SUP-031",
+    "priority_score": 0.82,
+    "priority": "HIGH",
+    "signals": [
+      "New supplier relationship with zero historical transactions",
+      "Rapid payment frequency: 5 payments within 7 days",
+      "Total unverified outflow: \u20b91,04,000",
+      "Novel graph edge creation with high edge weight"
+    ],
+    "description": "Unregistered supplier SUP-031 received \u20b91,04,000 across 5 rapid transfers without historical trading tenure."
+  },
+  {
+    "anomaly_id": "ANOM-BURST-TX",
+    "event_id": "PROD-042",
+    "category": "TRANSACTION_BURST",
+    "entity_id": "PROD-042",
+    "priority_score": 0.78,
+    "priority": "HIGH",
+    "signals": [
+      "12 orders placed within 13 minutes (normal velocity: 1 order/day)",
+      "Timestamp clustering index = 0.94",
+      "Concentrated nocturnal order activity (02:10 - 02:23 AM)",
+      "Possible inventory lock or automated scraping script"
+    ],
+    "description": "High velocity ordering burst on PROD-042 with 12 consecutive purchases in under 15 minutes."
+  },
+  {
+    "anomaly_id": "ANOM-TX-8291",
+    "event_id": "TX-8291",
+    "category": "UNUSUAL_TRANSACTION_AMOUNT",
+    "entity_id": "TX-8291",
+    "priority_score": 0.84,
+    "priority": "HIGH",
+    "signals": [
+      "Amount deviation z-score = 8.42 against product baseline",
+      "Single order value \u20b985,000 exceeds 99.9th percentile",
+      "Bulk quantity of 50 units on single residential consumer profile",
+      "High chargeback liability risk"
+    ],
+    "description": "Transaction TX-8291 of \u20b985,000 deviates 70.8x from average order baseline."
+  },
+  {
+    "anomaly_id": "ANOM-REFUND-SPIKE",
+    "event_id": "PROD-088",
+    "category": "REFUND_SPIKE",
+    "entity_id": "PROD-088",
+    "priority_score": 0.76,
+    "priority": "MEDIUM",
+    "signals": [
+      "Refund rate surged to 24.3% (historical baseline: 2.1%)",
+      "7 refunds totaling \u20b920,230 within 48 hours",
+      "100% cited Damaged Packaging reason",
+      "Carrier handling or packaging integrity issue"
+    ],
+    "description": "Refund spike on PROD-088 with 7 consecutive defect claims in 48 hours."
+  },
+  {
+    "anomaly_id": "ANOM-DUP-FEE",
+    "event_id": "FEE-9913",
+    "category": "DUPLICATE_TRANSACTION",
+    "entity_id": "FEE-9913",
+    "priority_score": 0.72,
+    "priority": "MEDIUM",
+    "signals": [
+      "Identical fee amount \u20b94,200 charged twice within 150 seconds",
+      "Duplicate reference key on ORD-5520",
+      "Marketplace billing gateway re-try artifact",
+      "Direct candidate for fee reimbursement claim"
+    ],
+    "description": "Potential duplicate marketplace storage fee deduction of \u20b94,200 on order ORD-5520."
+  },
+  {
+    "anomaly_id": "ANOM-RETURN-CLUSTER",
+    "event_id": "PROD-019",
+    "category": "RETURN_CLUSTER",
+    "entity_id": "PROD-019",
+    "priority_score": 0.68,
+    "priority": "MEDIUM",
+    "signals": [
+      "5 returns logged within 12 hours for SKU PROD-019",
+      "Carrier damage status reported across all instances",
+      "Temporal clustering score: 0.81",
+      "Potential batch transit drop event"
+    ],
+    "description": "Localized return cluster on PROD-019 with 5 concurrent damage claims."
+  }
+]

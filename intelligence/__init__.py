@@ -1,0 +1,1 @@
+# finGraph sentinel intelligence package
