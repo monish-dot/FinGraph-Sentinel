@@ -1,0 +1,169 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  FinGraph Sentinel - Serverless Explainable Financial Investigation System for Marketplace Sellers.
+  First Commit 2026 Hackathon (SHIP IT Track)
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.11
+    Environment:
+      Variables:
+        STAGE: prod
+        DYNAMODB_TABLE_ENTITIES: !Ref EntitiesTable
+        DYNAMODB_TABLE_TRANSACTIONS: !Ref TransactionsTable
+        DYNAMODB_TABLE_ANOMALIES: !Ref AnomaliesTable
+        S3_DATA_BUCKET: !Ref DataStorageBucket
+        BEDROCK_REGION: us-east-1
+        BEDROCK_MODEL_ID: anthropic.claude-3-5-sonnet-20241022-v2:0
+
+Resources:
+  # -------------------------------------------------------------
+  # Amazon API Gateway (HTTP API)
+  # -------------------------------------------------------------
+  FinGraphApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+          - POST
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+          - X-Requested-With
+        AllowOrigins:
+          - '*'
+
+  # -------------------------------------------------------------
+  # AWS Lambda Backend Function (FastAPI + Mangum)
+  # -------------------------------------------------------------
+  FinGraphBackendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/
+      Handler: app.handler
+      Description: FinGraph Sentinel API, Graph Intelligence & Strands Agent Handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref EntitiesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TransactionsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AnomaliesTable
+        - S3CrudPolicy:
+            BucketName: !Ref DataStorageBucket
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:InvokeModelWithResponseStream
+              Resource: '*'
+      Events:
+        ApiProxy:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref FinGraphApi
+            Path: /{proxy+}
+            Method: ANY
+        RootProxy:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref FinGraphApi
+            Path: /
+            Method: ANY
+
+  # -------------------------------------------------------------
+  # Amazon DynamoDB Tables
+  # -------------------------------------------------------------
+  EntitiesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: fingraph-entities
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: entity_id
+          AttributeType: S
+        - AttributeName: entity_type
+          AttributeType: S
+      KeySchema:
+        - AttributeName: entity_id
+          KeyType: HASH
+        - AttributeName: entity_type
+          KeyType: RANGE
+
+  TransactionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: fingraph-transactions
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: transaction_id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: transaction_id
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+
+  AnomaliesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: fingraph-anomalies
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: anomaly_id
+          AttributeType: S
+        - AttributeName: priority_score
+          AttributeType: N
+      KeySchema:
+        - AttributeName: anomaly_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: PriorityIndex
+          KeySchema:
+            - AttributeName: anomaly_id
+              KeyType: HASH
+            - AttributeName: priority_score
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  # -------------------------------------------------------------
+  # Amazon S3 Storage Bucket
+  # -------------------------------------------------------------
+  DataStorageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub fingraph-sentinel-data-${AWS::AccountId}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+            AllowedOrigins:
+              - '*'
+
+Outputs:
+  ApiEndpoint:
+    Description: HTTP API Gateway Endpoint URL
+    Value: !Sub 'https://${FinGraphApi}.execute-api.${AWS::Region}.amazonaws.com'
+  FunctionArn:
+    Description: Lambda Function ARN
+    Value: !GetAtt FinGraphBackendFunction.Arn
+  BucketName:
+    Description: S3 Data Storage Bucket
+    Value: !Ref DataStorageBucket
